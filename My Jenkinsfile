@@ -1,0 +1,36 @@
+pipeline {
+    agent { label 'My-agent' }
+    
+    stages {
+        stage ('clone'){
+            steps {
+                git url: 'https://github.com/LondheShubham153/node-todo-cicd.git', branch: 'master'
+            }
+        }
+    
+        stage ('build and Test'){
+            steps {
+                sh 'docker build . -t sangativamsikrishna/todoapp-cicd:latest'
+            }
+        }
+        
+        stage ('deploy'){
+            steps {
+                sh 'docker run -d -p 8000:8000 todoapp' 
+            
+            }
+        }
+        
+    
+     stage ('docker login and push'){
+            steps {
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub', passwordVariable: 'dockerHubpassword', usernameVariable: 'dockerHubuser')]) {
+                     sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubpassword}" 
+                     sh "docker push sangativamsikrishna/todoapp-cicd:latest"
+                    } 
+                
+            }
+        }
+        
+    }
+}
